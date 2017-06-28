@@ -29,7 +29,8 @@ if(!$.jgrid.hasOwnProperty("defaults")) {
 	$.jgrid.defaults = {
 		styleUI: 'Bootstrap',
 		responsive: true,
-		regional: 'cn'
+		regional: 'cn',
+		prmNames: {page: 'pageNo', rows: 'pageSize', sort: 'orderFields', order: 'order'}
 	};
 }
 $.extend($.jgrid,{
