@@ -555,6 +555,7 @@ $.extend($.jgrid,{
         elem.type = "text";
         elem.value = vl;
         elem.id = options.id;
+        elem.name = options.name;
         options = bindEv(elem, options);
         if (options.dicData) {
             options.nodes = options.dicData;
