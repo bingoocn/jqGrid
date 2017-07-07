@@ -30,6 +30,7 @@ if(!$.jgrid.hasOwnProperty("defaults")) {
 		styleUI: 'Bootstrap',
 		responsive: true,
 		regional: 'cn',
+		datatype: 'json',
 		prmNames: {page: 'pageNo', rows: 'pageSize', sort: 'orderFields', order: 'order'}
 	};
 }
