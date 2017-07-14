@@ -31,6 +31,8 @@ if(!$.jgrid.hasOwnProperty("defaults")) {
 		responsive: true,
 		regional: 'cn',
 		datatype: 'json',
+    _delrowid:[],
+    addParams : {serial:0,rowID : "new_row"},
 		prmNames: {page: 'pageNo', rows: 'pageSize', sort: 'orderFields', order: 'order'}
 	};
 }
@@ -4547,7 +4549,10 @@ $.jgrid.extend({
 		});
 		return success;
 	},
-	addRowData : function(rowid,rdata,pos,src) {
+  addRowDataWithChanged: function(rdata, pos, src) {
+    return $(this).jqGrid("addRowData", undefined, rdata, pos, src, true);
+  },
+	addRowData : function(rowid,rdata,pos,src,changed) {
 		if($.inArray( pos, ["first", "last", "before", "after"] ) === -1) {pos = "last";}
 		var success = false, nm, row, rnc="", msc="", gi, si, ni,sind, i, v, prp="", aradd, cnm, data, cm, id;
 		if(rdata) {
@@ -4564,14 +4569,22 @@ $.jgrid.extend({
 				ni = t.p.rownumbers===true ? 1 :0;
 				gi = t.p.multiselect ===true ? 1 :0;
 				si = t.p.subGrid===true ? 1 :0;
+        // 增加之前保存编辑状态的单元格
+        if (this.p.savedRow.length>0) {
+            $(this).jqGrid("saveCell",this.p.savedRow[0].id,this.p.savedRow[0].ic);
+        }
 				if(!aradd) {
 					if(rowid !== undefined) { rowid = String(rowid);}
 					else {
-						rowid = $.jgrid.randId();
+						// rowid = $.jgrid.randId();
 						if(t.p.keyName !== false) {
 							cnm = t.p.keyName;
 							if(rdata[0][cnm] !== undefined) { rowid = rdata[0][cnm]; }
 						}
+            if(rowid === undefined) {
+              // 如果rowid未传递,则使用符合新增规则的id格式
+              rowid = this.p.addParams.rowID + this.p.addParams.serial++;
+            }
 					}
 				}
 				var k = 0, classes = $(t).jqGrid('getStyleUI',t.p.styleUI+".base",'rowBox', true, 'jqgrow ui-row-'+ t.p.direction), lcdata = {},
@@ -4661,6 +4674,10 @@ $.jgrid.extend({
 						t.p.data.push(lcdata);
 						lcdata = {};
 					}
+          // 新增的行记为修改变更
+          if(changed) {
+            $("#"+rowid).addClass("edited added");
+          }
 				}
 				t.updatepager(true,true);
 				success = true;

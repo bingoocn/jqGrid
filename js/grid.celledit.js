@@ -649,7 +649,9 @@ $.jgrid.extend({
 		if (!mthd) {mthd='all';}
 		this.each(function(){
 			var $t= this,nm;
-			if (!$t.grid || $t.p.cellEdit !== true ) {return;}
+			// if (!$t.grid || $t.p.cellEdit !== true ) {return;}
+			// 对于使用..WithChanged方法的grid,仍然算作变动数据
+			if (!$t.grid) {return;}
 			$($t.rows).each(function(j){
 				var res = {};
 				if ($(this).hasClass("edited")) {
