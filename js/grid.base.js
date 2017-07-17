@@ -4461,10 +4461,17 @@ $.jgrid.extend({
 		});
 		return resall || res;
 	},
-	delRowData : function(rowid) {
+	delRowDataWithChanged: function(rowid) {
+		return $(this).jqGrid("delRowData", rowid, true);
+	},
+	delRowData : function(rowid,changed) {
 		var success = false, rowInd, ia, nextRow;
 		this.each(function() {
 			var $t = this;
+			// 删除之前保存编辑状态的单元格
+      if (this.p.savedRow.length>0) {
+          $(this).jqGrid("saveCell",this.p.savedRow[0].id,this.p.savedRow[0].ic);
+      }
 			rowInd = $($t).jqGrid('getGridRowById', rowid);
 			if(!rowInd) {return false;}
 				if($t.p.subGrid) {
@@ -4497,13 +4504,23 @@ $.jgrid.extend({
 					$t.refreshIndex();
 				}
 			}
-				});
+			if(success && changed) {
+				$t.p._delrowid.push(rowid);
+			}
+		});
 		return success;
 	},
-	setRowData : function(rowid, data, cssp) {
+	setRowDataWithChanged: function(rowid, data) {
+		return $(this).jqGrid("setRowData", rowid, data, undefined, true);
+	},
+	setRowData : function(rowid, data, cssp, changed) {
 		var nm, success=true, title;
 		this.each(function(){
 			if(!this.grid) {return false;}
+			// 设置之前保存编辑状态的单元格
+      if (this.p.savedRow.length>0) {
+          $(this).jqGrid("saveCell",this.p.savedRow[0].id,this.p.savedRow[0].ic);
+      }
 			var t = this, vl, ind, cp = typeof cssp, lcdata={};
 			ind = $(this).jqGrid('getGridRowById', rowid);
 			if(!ind) { return false; }
@@ -4543,6 +4560,9 @@ $.jgrid.extend({
 				}
 			}
 			if(success) {
+				if(changed) {
+					$("#"+rowid, t).addClass("edited");
+				}
 				if(cp === 'string') {$(ind).addClass(cssp);} else if(cssp !== null && cp === 'object') {$(ind).css(cssp);}
 				$(t).triggerHandler("jqGridAfterGridComplete");
 			}
