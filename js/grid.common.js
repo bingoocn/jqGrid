@@ -431,8 +431,23 @@ $.extend($.jgrid,{
 							options = $.extend({},this.options),
 							msl = options.multiple===true,
 							cU = options.cacheUrlData === true,
-							oV ='', txt,
-							a = $.isFunction(options.buildSelect) ? options.buildSelect.call($t,data) : data;
+							oV ='', txt;
+							// 如果返回的数据为json,则提供默认的buildSelect方法
+							try{
+								var jsonData = JSON.parse(data);
+								if(!$.isFunction(options.buildSelect)) {
+									options.buildSelect = function() {
+										var select = $('<select></select>');
+										$.each(jsonData, function(i, item) {
+											var option = $('<option></option>');
+											option.attr('value', item.value).text(item.name);
+											select.append(option);
+										});
+										return select.prop('outerHTML');
+									};
+								}
+							} catch(e) {}
+							var a = $.isFunction(options.buildSelect) ? options.buildSelect.call($t,data) : data;
 							if(typeof a === 'string') {
 								a = $( $.trim( a ) ).html();
 							}
