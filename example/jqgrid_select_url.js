@@ -5,7 +5,7 @@ var grid;
         var mydata = [{
             nodeId: '1',
             nodeNm: '学习',
-            select: '1996'
+            select: '3'
         }];
         var options = {
             id: '#jqGrid',

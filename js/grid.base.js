@@ -1223,6 +1223,7 @@ $.fn.jqGrid = function( pin ) {
 				var colContent = pin.colModel[i];
 				if (colContent.editable) {
 						switch (colContent.edittype) {
+								case "select":
 								case "pickerTree":
 										if (typeof colContent.cellattr == "undefined") colContent.cellattr = getCellValue;
 										colContent.formatter = "dictionary";
@@ -1700,7 +1701,7 @@ $.fn.jqGrid = function( pin ) {
 			var v,prp;
 			v = formatter(rowId,cell,pos,srvr,'add');
 			prp = formatCol( pos,irow, v, srvr, rowId, rdata);
-			return "<td role=\"gridcell\" "+prp+">"+v+"</td>";
+			return "<td role=\"gridcell\" "+prp+ " value=\""+cell+"\""+">"+v+"</td>";
 		},
 		addMulti = function(rowid, pos, irow, checked, uiclass){
 			var	v = "<input role=\"checkbox\" type=\"checkbox\""+" id=\"jqg_"+ts.p.id+"_"+rowid+"\" "+uiclass+" name=\"jqg_"+ts.p.id+"_"+rowid+"\"" + (checked ? "checked=\"checked\"" : "")+"/>",
