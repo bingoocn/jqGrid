@@ -4531,13 +4531,18 @@ $.jgrid.extend({
 						nm = this.name;
 						var dval =$.jgrid.getAccessor(data,nm);
 						if( dval !== undefined) {
+              // 如果格式化类型为formatter,则需要在td中设置value属性
+              var value = {};
+              if(this.formatter === 'dictionary') {
+                value.value = dval;
+              }
 							lcdata[nm] = this.formatter && typeof this.formatter === 'string' && this.formatter === 'date' ? $.unformat.date.call(t,dval,this) : dval;
 							vl = t.formatter( rowid, lcdata[nm], i, data, 'edit');
 							title = this.title ? {"title":$.jgrid.stripHtml(vl)} : {};
 							if(t.p.treeGrid===true && nm === t.p.ExpandColumn) {
-								$("td[role='gridcell']:eq("+i+") > span:first",ind).html(vl).attr(title);
+								$("td[role='gridcell']:eq("+i+") > span:first",ind).html(vl).attr(title).attr(value);
 							} else {
-								$("td[role='gridcell']:eq("+i+")",ind).html(vl).attr(title);
+								$("td[role='gridcell']:eq("+i+")",ind).html(vl).attr(title).attr(value);
 							}
 						}
 					});
