@@ -4898,7 +4898,8 @@ $.jgrid.extend({
 				$.each($t.p.colModel, function(i) {
 					if(this.hidden === false && !this.fixed){
 						cw = this.widthOrg;
-						cw = Math.round(aw*cw/($t.p.tblwidth-brd*vc-gw));
+						// aw减去bstw,因为table外侧的div宽度剪了bstw
+						cw = Math.round((aw-bstw)*cw/($t.p.tblwidth-brd*vc-gw));
 						if (cw < 0) { return; }
 						this.width =cw;
 						initwidth += cw;
@@ -4920,8 +4921,9 @@ $.jgrid.extend({
 				} else if( Math.abs(nwidth-gw-(initwidth+brd*vc)) !== 1) {
 					cr = nwidth-gw-(initwidth+brd*vc);
 				}
-				$t.p.colModel[lvc].width += cr;
-				$t.p.tblwidth = initwidth+cr+brd*vc+gw;
+				// 减去bstw,因为table外侧的div宽度剪了bstw,多减去的1,要进行验证,现在最后一列前去1,正好不出滚动条,可能跟样式相关
+				$t.p.colModel[lvc].width += cr-bstw-1;
+				$t.p.tblwidth = initwidth+cr+brd*vc+gw-bstw;
 				if($t.p.tblwidth > nwidth) {
 					var delta = $t.p.tblwidth - parseInt(nwidth,10);
 					$t.p.tblwidth = nwidth;
