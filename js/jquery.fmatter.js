@@ -50,6 +50,8 @@
                   temp = cm.editoptions.data;
               } else if (cm.editoptions.url) {
                   temp = cm.editoptions.url;
+              } else if (cm.editoptions.dataUrl) {
+                  temp = cm.editoptions.dataUrl;
               }
           }
           if (typeof temp === "string") {

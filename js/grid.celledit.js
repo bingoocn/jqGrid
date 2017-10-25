@@ -38,6 +38,36 @@
 "use strict";
 //module begin
 $.jgrid.extend({
+	checkGridData : function(data) {
+		// 如果传进来的是String，转换为Js对象
+		var oData = data;
+		if ("string" == typeof(data)) {
+			oData = JSON.parse(data);
+		}
+		var $t = this[0];
+		var result = [];
+		for (var i = 0; i < oData.addRows.length; i++) {
+			for (var j = 0; j < $t.p.colModel.length; j++) {
+				var cv = $.jgrid.checkValues.call($t,
+					oData.addRows[i][$t.p.colModel[j].name], j);
+				if (!cv[0])
+					result.push(cv);
+			}
+
+		}
+		for (var i = 0; i < oData.updateRows.length; i++) {
+			for (var j = 0; j < $t.p.colModel.length; j++) {
+				var cv = $.jgrid.checkValues.call($t,
+					oData.updateRows[i][$t.p.colModel[j].name], j);
+				if (!cv[0])
+					result.push(cv);
+			}
+
+		}
+		if (0 === result.length)
+			return [[true, ""]];
+		return result;
+	},
 	// 获取grid中编辑、新增、删除的json数据
   // -- by zhanghp 20120804 增加参数validated bool类型，默认值 true
   // 如果设置为false，不进行数据验证就进行提交数据获取操作
@@ -53,6 +83,9 @@ $.jgrid.extend({
 	    //设置之前保存编辑状态的单元格
 	    if ($t.p.savedRow.length > 0) {
 	        $($t).jqGrid("saveCell", $t.p.savedRow[0].id, $t.p.savedRow[0].ic);
+	        if($t.lastSaveFail) {
+	        	return null;
+	        }
 	    }
 	    //获取编辑的数据
 	    editrowobj = jQuery($t).jqGrid('getChangedCells', 'all');
@@ -87,18 +120,17 @@ $.jgrid.extend({
 	    targetjson.addRows = insertrow;
 	    targetjson.updateRows = editrow;
 	    targetjson.deleteRows = delids;
-
-	    // --by zhanghp 2012/08/07 start
-	    // todo 增加验证
-	    /*if ('undefined' === typeof validated || true === validated) {
-	        var isValid = this.checkGridData(targetjson);
+	    if ('undefined' === typeof validated || true === validated) {
+	    		var isValid = $($t).jqGrid('checkGridData', targetjson);
 	        if (!isValid[0][0]) {
-	        	//todo i18n
-	          alert("校验失败!");
+	        	window.setTimeout(function() {
+							$.jgrid.info_dialog('错误', ' ' + isValid[0][1], '关闭', {
+								styleUI : $t.p.styleUI
+							});
+						},50);
 	          return null;
 	        }
-	    }*/
-	    // --by zhanghp 2010/08/07 end
+	    }
 
 	    if (typeof custompara != 'undefined') {
 	        targetjson.custompara = custompara;
@@ -230,6 +262,7 @@ $.jgrid.extend({
 			var $t= this, fr = $t.p.savedRow.length >= 1 ? 0 : null,
 			errors = $.jgrid.getRegional(this, 'errors'),
 			edit =$.jgrid.getRegional(this, 'edit');
+			$t.lastSaveFail = false;
 			if (!$t.grid || $t.p.cellEdit !== true) {return;}
 			if(fr !== null) {
 				var trow = $($t).jqGrid("getGridRowById", $t.p.savedRow[0].rowId),
@@ -444,6 +477,7 @@ $.jgrid.extend({
 						}
 					} else {
 						try {
+							$t.lastSaveFail = true;
 							if( $.isFunction($t.p.validationCell) ) {
 								$t.p.validationCell.call($t, $("#"+iRow+"_"+nmjq, trow), cv[1], iRow, iCol);
 							} else {

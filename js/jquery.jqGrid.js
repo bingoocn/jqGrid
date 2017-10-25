@@ -1,6 +1,6 @@
 /**
 *
-* @license Guriddo jqGrid JS - v5.2.1 - 2017-06-20
+* @license Guriddo jqGrid JS - v5.2.1 - 2017-09-22
 * Copyright(c) 2008, Tony Tomov, tony@trirand.com
 * 
 * License: http://guriddo.net/?page_id=103334
@@ -24,7 +24,11 @@ if(!$.jgrid.hasOwnProperty("defaults")) {
 	$.jgrid.defaults = {
 		styleUI: 'Bootstrap',
 		responsive: true,
-		regional: 'cn'
+		regional: 'cn',
+		datatype: 'json',
+    _delrowid:[],
+    addParams : {serial:0,rowID : "new_row"},
+		prmNames: {page: 'pageNo', rows: 'pageSize', sort: 'orderFields', order: 'order'}
 	};
 }
 $.extend($.jgrid,{
@@ -4452,10 +4456,17 @@ $.jgrid.extend({
 		});
 		return resall || res;
 	},
-	delRowData : function(rowid) {
+	delRowDataWithChanged: function(rowid) {
+		return $(this).jqGrid("delRowData", rowid, true);
+	},
+	delRowData : function(rowid,changed) {
 		var success = false, rowInd, ia, nextRow;
 		this.each(function() {
 			var $t = this;
+			// 删除之前保存编辑状态的单元格
+      if (this.p.savedRow.length>0) {
+          $(this).jqGrid("saveCell",this.p.savedRow[0].id,this.p.savedRow[0].ic);
+      }
 			rowInd = $($t).jqGrid('getGridRowById', rowid);
 			if(!rowInd) {return false;}
 				if($t.p.subGrid) {
@@ -4488,13 +4499,23 @@ $.jgrid.extend({
 					$t.refreshIndex();
 				}
 			}
-				});
+			if(success && changed) {
+				$t.p._delrowid.push(rowid);
+			}
+		});
 		return success;
 	},
-	setRowData : function(rowid, data, cssp) {
+	setRowDataWithChanged: function(rowid, data) {
+		return $(this).jqGrid("setRowData", rowid, data, undefined, true);
+	},
+	setRowData : function(rowid, data, cssp, changed) {
 		var nm, success=true, title;
 		this.each(function(){
 			if(!this.grid) {return false;}
+			// 设置之前保存编辑状态的单元格
+      if (this.p.savedRow.length>0) {
+          $(this).jqGrid("saveCell",this.p.savedRow[0].id,this.p.savedRow[0].ic);
+      }
 			var t = this, vl, ind, cp = typeof cssp, lcdata={};
 			ind = $(this).jqGrid('getGridRowById', rowid);
 			if(!ind) { return false; }
@@ -4534,13 +4555,19 @@ $.jgrid.extend({
 				}
 			}
 			if(success) {
+				if(changed) {
+					$("#"+rowid, t).addClass("edited");
+				}
 				if(cp === 'string') {$(ind).addClass(cssp);} else if(cssp !== null && cp === 'object') {$(ind).css(cssp);}
 				$(t).triggerHandler("jqGridAfterGridComplete");
 			}
 		});
 		return success;
 	},
-	addRowData : function(rowid,rdata,pos,src) {
+  addRowDataWithChanged: function(rdata, pos, src) {
+    return $(this).jqGrid("addRowData", undefined, rdata, pos, src, true);
+  },
+	addRowData : function(rowid,rdata,pos,src,changed) {
 		if($.inArray( pos, ["first", "last", "before", "after"] ) === -1) {pos = "last";}
 		var success = false, nm, row, rnc="", msc="", gi, si, ni,sind, i, v, prp="", aradd, cnm, data, cm, id;
 		if(rdata) {
@@ -4557,14 +4584,22 @@ $.jgrid.extend({
 				ni = t.p.rownumbers===true ? 1 :0;
 				gi = t.p.multiselect ===true ? 1 :0;
 				si = t.p.subGrid===true ? 1 :0;
+        // 增加之前保存编辑状态的单元格
+        if (this.p.savedRow.length>0) {
+            $(this).jqGrid("saveCell",this.p.savedRow[0].id,this.p.savedRow[0].ic);
+        }
 				if(!aradd) {
 					if(rowid !== undefined) { rowid = String(rowid);}
 					else {
-						rowid = $.jgrid.randId();
+						// rowid = $.jgrid.randId();
 						if(t.p.keyName !== false) {
 							cnm = t.p.keyName;
 							if(rdata[0][cnm] !== undefined) { rowid = rdata[0][cnm]; }
 						}
+            if(rowid === undefined) {
+              // 如果rowid未传递,则使用符合新增规则的id格式
+              rowid = this.p.addParams.rowID + this.p.addParams.serial++;
+            }
 					}
 				}
 				var k = 0, classes = $(t).jqGrid('getStyleUI',t.p.styleUI+".base",'rowBox', true, 'jqgrow ui-row-'+ t.p.direction), lcdata = {},
@@ -4654,6 +4689,10 @@ $.jgrid.extend({
 						t.p.data.push(lcdata);
 						lcdata = {};
 					}
+          // 新增的行记为修改变更
+          if(changed) {
+            $("#"+rowid).addClass("edited added");
+          }
 				}
 				t.updatepager(true,true);
 				success = true;
@@ -6296,7 +6335,9 @@ $.jgrid.extend({
 		if (!mthd) {mthd='all';}
 		this.each(function(){
 			var $t= this,nm;
-			if (!$t.grid || $t.p.cellEdit !== true ) {return;}
+			// if (!$t.grid || $t.p.cellEdit !== true ) {return;}
+			// 对于使用..WithChanged方法的grid,仍然算作变动数据
+			if (!$t.grid) {return;}
 			$($t.rows).each(function(j){
 				var res = {};
 				if ($(this).hasClass("edited")) {
@@ -6755,8 +6796,23 @@ $.extend($.jgrid,{
 							options = $.extend({},this.options),
 							msl = options.multiple===true,
 							cU = options.cacheUrlData === true,
-							oV ='', txt,
-							a = $.isFunction(options.buildSelect) ? options.buildSelect.call($t,data) : data;
+							oV ='', txt;
+							// 如果返回的数据为json,则提供默认的buildSelect方法
+							try{
+								var jsonData = JSON.parse(data);
+								if(!$.isFunction(options.buildSelect)) {
+									options.buildSelect = function() {
+										var select = $('<select></select>');
+										$.each(jsonData, function(i, item) {
+											var option = $('<option></option>');
+											option.attr('value', item.value).text(item.name);
+											select.append(option);
+										});
+										return select.prop('outerHTML');
+									};
+								}
+							} catch(e) {}
+							var a = $.isFunction(options.buildSelect) ? options.buildSelect.call($t,data) : data;
 							if(typeof a === 'string') {
 								a = $( $.trim( a ) ).html();
 							}
@@ -6879,6 +6935,7 @@ $.extend($.jgrid,{
         elem.type = "text";
         elem.value = vl;
         elem.id = options.id;
+        elem.name = options.name;
         options = bindEv(elem, options);
         if (options.dicData) {
             options.nodes = options.dicData;

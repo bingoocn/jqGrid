@@ -1223,6 +1223,7 @@ $.fn.jqGrid = function( pin ) {
 				var colContent = pin.colModel[i];
 				if (colContent.editable) {
 						switch (colContent.edittype) {
+								case "select":
 								case "pickerTree":
 										if (typeof colContent.cellattr == "undefined") colContent.cellattr = getCellValue;
 										colContent.formatter = "dictionary";
@@ -1700,7 +1701,7 @@ $.fn.jqGrid = function( pin ) {
 			var v,prp;
 			v = formatter(rowId,cell,pos,srvr,'add');
 			prp = formatCol( pos,irow, v, srvr, rowId, rdata);
-			return "<td role=\"gridcell\" "+prp+">"+v+"</td>";
+			return "<td role=\"gridcell\" "+prp+ " value=\""+cell+"\""+">"+v+"</td>";
 		},
 		addMulti = function(rowid, pos, irow, checked, uiclass){
 			var	v = "<input role=\"checkbox\" type=\"checkbox\""+" id=\"jqg_"+ts.p.id+"_"+rowid+"\" "+uiclass+" name=\"jqg_"+ts.p.id+"_"+rowid+"\"" + (checked ? "checked=\"checked\"" : "")+"/>",
@@ -4530,13 +4531,18 @@ $.jgrid.extend({
 						nm = this.name;
 						var dval =$.jgrid.getAccessor(data,nm);
 						if( dval !== undefined) {
+              // 如果格式化类型为formatter,则需要在td中设置value属性
+              var value = {};
+              if(this.formatter === 'dictionary') {
+                value.value = dval;
+              }
 							lcdata[nm] = this.formatter && typeof this.formatter === 'string' && this.formatter === 'date' ? $.unformat.date.call(t,dval,this) : dval;
 							vl = t.formatter( rowid, lcdata[nm], i, data, 'edit');
 							title = this.title ? {"title":$.jgrid.stripHtml(vl)} : {};
 							if(t.p.treeGrid===true && nm === t.p.ExpandColumn) {
-								$("td[role='gridcell']:eq("+i+") > span:first",ind).html(vl).attr(title);
+								$("td[role='gridcell']:eq("+i+") > span:first",ind).html(vl).attr(title).attr(value);
 							} else {
-								$("td[role='gridcell']:eq("+i+")",ind).html(vl).attr(title);
+								$("td[role='gridcell']:eq("+i+")",ind).html(vl).attr(title).attr(value);
 							}
 						}
 					});
@@ -4892,7 +4898,8 @@ $.jgrid.extend({
 				$.each($t.p.colModel, function(i) {
 					if(this.hidden === false && !this.fixed){
 						cw = this.widthOrg;
-						cw = Math.round(aw*cw/($t.p.tblwidth-brd*vc-gw));
+						// aw减去bstw,因为table外侧的div宽度剪了bstw
+						cw = Math.round((aw-bstw)*cw/($t.p.tblwidth-brd*vc-gw));
 						if (cw < 0) { return; }
 						this.width =cw;
 						initwidth += cw;
@@ -4914,8 +4921,9 @@ $.jgrid.extend({
 				} else if( Math.abs(nwidth-gw-(initwidth+brd*vc)) !== 1) {
 					cr = nwidth-gw-(initwidth+brd*vc);
 				}
-				$t.p.colModel[lvc].width += cr;
-				$t.p.tblwidth = initwidth+cr+brd*vc+gw;
+				// 减去bstw,因为table外侧的div宽度剪了bstw,多减去的1,要进行验证,现在最后一列前去1,正好不出滚动条,可能跟样式相关
+				$t.p.colModel[lvc].width += cr-bstw-1;
+				$t.p.tblwidth = initwidth+cr+brd*vc+gw-bstw;
 				if($t.p.tblwidth > nwidth) {
 					var delta = $t.p.tblwidth - parseInt(nwidth,10);
 					$t.p.tblwidth = nwidth;
