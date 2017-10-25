@@ -51,7 +51,8 @@ $.jgrid.regional["cn"] = {
 		scrollRefresh : "滚动刷新..."
     },
     search : {
-        caption: "搜索...",
+        //caption: "搜索...",
+        caption: "高级查询",
         Find: "查找",
         Reset: "重置",
         odata: [{ oper:'eq', text:'等于\u3000\u3000'},{ oper:'ne', text:'不等于\u3000'},{ oper:'lt', text:'小于\u3000\u3000'},{ oper:'le', text:'小于等于'},{ oper:'gt', text:'大于\u3000\u3000'},{ oper:'ge', text:'大于等于'},{ oper:'bw', text:'开头是'},{ oper:'bn', text:'开头不是'},{ oper:'in', text:'属于\u3000\u3000'},{ oper:'ni', text:'不属于'},{ oper:'ew', text:'结尾是'},{ oper:'en', text:'结尾不是'},{ oper:'cn', text:'包含\u3000\u3000'},{ oper:'nc', text:'不包含'},{ oper:'nu', text:'为空'},{ oper:'nn', text:'不为空'}, {oper:'bt', text:'区间'}],
