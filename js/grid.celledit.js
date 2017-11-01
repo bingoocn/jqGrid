@@ -481,8 +481,13 @@ $.jgrid.extend({
 							if( $.isFunction($t.p.validationCell) ) {
 								$t.p.validationCell.call($t, $("#"+iRow+"_"+nmjq, trow), cv[1], iRow, iCol);
 							} else {
+								// 修改校验错误提示,并增加自定义提示信息.
+								var errorMessage = cv[1];
+								if($.isFunction(cm.editrules.custom_message)) {
+									errorMessage = cm.editrules.custom_message.call($t, cv[2], v);
+								}
 								window.setTimeout(function(){
-									$.jgrid.info_dialog(errors.errcap,v+ " " + cv[1], edit.bClose, {
+									$.jgrid.info_dialog(errors.errcap, errorMessage, edit.bClose, {
 										styleUI : $t.p.styleUI, 
 										top:p.top+30, 
 										left:p.left ,
