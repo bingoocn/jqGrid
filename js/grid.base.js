@@ -1224,10 +1224,17 @@ $.fn.jqGrid = function( pin ) {
 				if (colContent.editable) {
 						switch (colContent.edittype) {
 								case "select":
+									if (typeof colContent.cellattr == "undefined") colContent.cellattr = getCellValue;
+									colContent.formatter = "dictionary";
+									break;
 								case "pickerTree":
 										if (typeof colContent.cellattr == "undefined") colContent.cellattr = getCellValue;
 										colContent.formatter = "dictionary";
 										colContent.classes = "jqgirdPicker";
+										// 默认ajax第一次请求的数据,作为之后ztree初始化的数据.
+										colContent.editoptions.async = $.extend(true, {
+											loadOnce: true
+										}, colContent.editoptions.async);
 										break;
 								default:
 										break;

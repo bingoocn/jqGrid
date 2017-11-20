@@ -572,7 +572,7 @@ $.extend($.jgrid,{
         elem.id = options.id;
         elem.name = options.name;
         options = bindEv(elem, options);
-        if (options.dicData) {
+        if (options.dicData && options.async.loadOnce) {
             options.nodes = options.dicData;
         }
         //var setting = $.extend(options,{targetElem:elem,value:vl});

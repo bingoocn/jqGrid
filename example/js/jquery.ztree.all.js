@@ -990,6 +990,10 @@
 				for (i = 0, l = setting.async.otherParam.length; i < l; i += 2) {
 					tmpParam[setting.async.otherParam[i]] = setting.async.otherParam[i + 1];
 				}
+			} else if($.isFunction(setting.async.otherParam)) {
+				// otherParam支持函数,可以动态进行参数传递
+				tmpParam = setting.async.otherParam(setting.rowId);
+				setting.async.contentType = 'application/json';
 			} else {
 				for (var p in setting.async.otherParam) {
 					tmpParam[p] = setting.async.otherParam[p];
