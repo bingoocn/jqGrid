@@ -993,7 +993,6 @@
 			} else if($.isFunction(setting.async.otherParam)) {
 				// otherParam支持函数,可以动态进行参数传递
 				tmpParam = setting.async.otherParam(setting.rowId);
-				setting.async.contentType = 'application/json';
 			} else {
 				for (var p in setting.async.otherParam) {
 					tmpParam[p] = setting.async.otherParam[p];
