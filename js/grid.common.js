@@ -93,7 +93,9 @@ $.extend($.jgrid,{
 		var ahr= $("<a class='ui-jqdialog-titlebar-close "+common.cornerall+"'></a>")
 		.hover(function(){ahr.addClass(common.hover);},
 			function(){ahr.removeClass(common.hover);})
-		.append("<span class='" + common.icon_base+" " + classes.icon_close + "'></span>");
+		/*.append("<span class='" + common.icon_base+" " + classes.icon_close + "'></span>");*/
+		/*2017-12-15  根据军品生产系统需求统一高级查询关闭按钮的样式 */
+		.append("<button type='button' class='searchGrid close'>×</button>");
 		$(mh).append(ahr);
 		if(rtlsup) {
 			mw.dir = "rtl";
