@@ -450,6 +450,12 @@ $.fn.jqFilter = function( arg ) {
 				// data
 				$(".data",trpar).append( elm );
 				$.jgrid.bindEv.call($t, elm, cm.searchoptions);
+				if(cm.inputtype == 'pickerTree') {
+					var setting = $.extend({}, cm.editoptions, cm.searchoptions, {
+						targetElem: elm
+					});
+          new cngc.pickerTree(setting);
+				}
 				$(".input-elm",trpar).on('change',function( e ) {
 					var elem = e.target;
 					if( cm.inputtype === 'custom' && $.isFunction(cm.searchoptions.custom_value) ) {
@@ -551,6 +557,16 @@ $.fn.jqFilter = function( arg ) {
 			// is created previously
 			//ruleDataInput.setAttribute("type", "text");
 			ruleDataTd.append(ruleDataInput);
+			if(cm.inputtype == 'pickerTree') {
+					// 重新绘制高级查询时,对于pickertree字段,要在input元素添加到了dom树上时,
+					// 才能进行pickertree的初始化
+					var setting = $.extend({}, cm.editoptions, cm.searchoptions, {
+						targetElem: ruleDataInput, selected: rule.data
+					});
+					window.setTimeout(function() {
+						new cngc.pickerTree(setting);
+					}, 0);
+				}
 			$.jgrid.bindEv.call($t, ruleDataInput, cm.searchoptions);
 			$(ruleDataInput)
 			.addClass("input-elm " + classes.srInput )
