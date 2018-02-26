@@ -1224,8 +1224,11 @@ $.fn.jqGrid = function( pin ) {
 				if (colContent.editable) {
 						switch (colContent.edittype) {
 								case "select":
-									if (typeof colContent.cellattr == "undefined") colContent.cellattr = getCellValue;
-									colContent.formatter = "dictionary";
+									// 对于使用value,设置静态数据的情况,仍然采取默认操作
+									if(typeof colContent.editoptions.value === "undefined") {
+										if (typeof colContent.cellattr == "undefined") colContent.cellattr = getCellValue;
+										colContent.formatter = "dictionary";
+									}
 									break;
 								case "pickerTree":
 										if (typeof colContent.cellattr == "undefined") colContent.cellattr = getCellValue;
