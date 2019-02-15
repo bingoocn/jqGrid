@@ -24,7 +24,7 @@ var grid;
                 name: 'nodeNm',
                 width: 150,
                 editable: true,
-                edittype: 'text'
+                edittype: 'select'
             }, {
                 label: '时间',
                 name: 'orderDate',

@@ -35,9 +35,13 @@ var grid;
         }];
         var options = {
             id: '#jqGrid',
+            pager: '#jqGridPager',
             cellsubmit: 'clientArray',
             datatype: 'local',
             data: mydata,
+            viewrecords: true,
+            rowNum: 10,
+            rowList: [10, 20, 30],
             width: 760,
             colModel: [{
                 name: 'nodeId',
@@ -53,6 +57,7 @@ var grid;
                 label: '节点类型',
                 name: 'nodeType',
                 edittype: 'pickerTree',
+                stype:'pickerTree',
                 editable: true,
                 align: 'center',
                 editoptions: {
@@ -75,11 +80,47 @@ var grid;
                         }
                     }
                 }
-            }
+            }, {
+                label: '时间',
+                name: 'orderDate',
+                edittype: 'text',
+                editable: true,
+                width: 150,
+                editoptions: {
+                    dataInit: function(element) {
+                      $(element).datepicker({
+                        autoclose: true,
+                        format: 'yyyy-mm-dd',
+                        orientation: 'auto bottom'
+                      });
+                    }
+                },
+                searchoptions: {
+                    dataInit: function(element) {
+                      $(element).datepicker({
+                        autoclose: true,
+                        format: 'yyyy-mm-dd',
+                        orientation: 'auto bottom'
+                      });
+                    }
+                }
+              }
             ],
             height: 300,
             cellEdit: true
         };
         grid = $('#jqGrid').jqGrid(options);
+        $('#jqGrid').navGrid('#jqGridPager', {
+                search: true, // show search button on the toolbar
+                add: false,
+                edit: false,
+                del: false,
+                refresh: false
+            },
+            {}, // edit options
+            {}, // add options
+            {}, // delete options
+            {multipleSearch: true, multipleGroup: true, showQuery: true} // search options - define multiple search
+            );
     });
 }();

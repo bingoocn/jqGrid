@@ -5,7 +5,7 @@ var grid;
         var mydata = [{
             nodeId: '1',
             nodeNm: '学习',
-            select: '3'
+            select: 'A'
         }];
         var options = {
             id: '#jqGrid',
@@ -32,7 +32,8 @@ var grid;
                 editable: true,
                 width: 150,
                 editoptions: {
-                    dataUrl : "http://localhost:8080/test/select_data.json"
+                    /*dataUrl : "http://localhost:8080/data/select_data.json"*/
+                    value: 'A:数字;B:学奥数'
                 }
               }
             ]

@@ -221,7 +221,12 @@ var cngc = cngc || {};
       options.callback.onClick = function(e, treeId, treeNode) {
         if (!$.fn.zTree.getZTreeObj(treeId).setting.check.enable) {
           $(me.target + '_text_input').val(treeNode.name).trigger('input');
+          var oldVal = $(me.target).val();
           $(me.target).val(treeNode.id);
+          // 如果绑定的input元素值发生变化,则出发change事件
+          if(oldVal != treeNode.id) {
+            $(me.target).change();
+          }
         }
         if ($.isFunction(_onClick)) {
           _onClick(e, treeId, treeNode);
